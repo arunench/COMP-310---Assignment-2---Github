@@ -1,3 +1,5 @@
+//Arunen Chellan
+//Assignment 2
 #include <pthread.h>
 
 
