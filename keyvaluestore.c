@@ -8,6 +8,28 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <semaphore.h>
+
+// This function creates a store if it is not yet created or opens the store if it is already created
+int kv_store_create(char *name){
+
+}
+
+// This function takes a key-values pair and writes them to the store. The key and value strings can be length limited
+int kv_store_write(char *key, char *value){
+
+}
+
+// This function takes a key and searches the store for the key-value pair.
+char *kv_store_read(char *key){
+
+}
+
+// This function takes a key and returns all the values in the store. A NULL is returned if there is no records for the key.
+char **kv_store_read_all(char *key){
+	
+}
+
 
 // This program illustrates the three major activities we need to perform with POSIX shared memory,
 // setting up, writing, and reading
