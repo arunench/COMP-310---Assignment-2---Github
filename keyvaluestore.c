@@ -10,6 +10,16 @@
 #include <string.h>
 #include <semaphore.h>
 
+struct key_value{
+	int key;
+	char* value;
+};
+
+struct key_value kv;
+kv.key = 1;
+kv.value = "foo";
+
+
 // This function creates a store if it is not yet created or opens the store if it is already created
 int kv_store_create(char *name){
 
