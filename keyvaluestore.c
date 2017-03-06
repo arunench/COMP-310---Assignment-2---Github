@@ -10,11 +10,6 @@
 #include <string.h>
 #include <semaphore.h>
 
-struct key_value{
-	int key;
-	char* value;
-};
-
 char kv_db[256*256*256 + (3*256)]; 
 char *addr;
 int KV_SIZE = sizeof(kv_db);
@@ -28,12 +23,17 @@ int fd;
 // This function creates a store if it is not yet created or opens the store if it is already created
 int kv_store_create(char *name){
 
-	for (int i = 0; i < sizeof(kv_db); i++){
-		kv_db[i] = NULL;
-	}
+
 
 	fd = shm_open(name, O_CREAT|O_RDWR, S_IRWXU); 
+
 	addr = mmap(NULL, KV_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+
+	for (int i = 0; i < KV_SIZE; i++){
+		addr[i] = NULL;
+	}
+
+
 	if (fd < 0){
 		printf("Error.. opening shm\n");
 		return -1;
@@ -64,56 +64,36 @@ int kv_store_write(char *key, char *value){
 	while(i < (location_wr + 256*256)){
 
 		if (addr[i] == NULL){
+
 			int offset = i;
 			printf("At index %d we insert the characters\n", i);
+
 			for (int j = 0; j < strlen(value); j++){
 				addr[i+j] = value[j];
 				printf("At index %d we insert the character %c\n", i+j, addr[i+j]);
 			}
+
 			memcpy(addr + offset, value, ENTRY_SIZE);
 			printf("Copied into memory\n");
 			return 0;
+
 		}
+
 		else{
 
+			printf("This is whats in that memory location %c\n", addr[i]);
 			i = i + 256;
 			printf("That memory location is already full, need to increment to next data entry. Will check memory space %d\n", i);
+
 		}
 		
 	}
 		
-
-
-	// if (strlen(key) <= 32){
-
-	// 	for (int i = 0, i < strlen(key); i++){
-
-	// 	}
-	// }
 	return 0;
 }
 
 // This function takes a key and searches the store for the key-value pair.
 char *kv_store_read(char *key){
-	struct stat s;
-
-	fd = shm_open ("achell", O_RDWR, 0);
-	if (fd < 0){
-		printf("Error... opening shm\n");
-	}
-
-	if (fstat(fd, &s) == -1){
-		printf("Error fstat\n");
-	}
-
-    int filedesc = open("testfile.txt", O_WRONLY | O_APPEND);
- 
-    if (filedesc < 0) {
-        return -1;
-    }
-
-	write(filedesc, "This will be output to testfile.txt\n", 36);
-
 
 }
 
@@ -151,11 +131,5 @@ int main (int argc, char **argv){
 	kv_store_create("achell");
 	kv_store_write("Arunen", "Today");
 	kv_store_write("Arunen", "Green");
-    int filedesc = open("testfile.txt", O_WRONLY | O_APPEND);
- 
-    if (filedesc < 0) {
-        return -1;
-    }
 
-	write(filedesc, "This will be output to testfile.txt\n", 36);
 }
