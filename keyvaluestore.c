@@ -16,10 +16,12 @@ struct key_value{
 };
 
 char kv_db[256*256*256 + (3*256)]; 
+char *addr;
 int KV_SIZE = sizeof(kv_db);
 int NUMBER_OF_PODS = 256;
 int NUMBER_OF_ENTRIES = 256;
 int ENTRY_SIZE = 256;
+int fd;
 
 
 
@@ -30,8 +32,8 @@ int kv_store_create(char *name){
 		kv_db[i] = NULL;
 	}
 
-	int fd = shm_open(name, O_CREAT|O_RDWR, S_IRWXU); 
-	char *addr = mmap(NULL, KV_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	fd = shm_open(name, O_CREAT|O_RDWR, S_IRWXU); 
+	addr = mmap(NULL, KV_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (fd < 0){
 		printf("Error.. opening shm\n");
 		return -1;
@@ -45,7 +47,6 @@ int kv_store_create(char *name){
 		close(fd);
 	}
 
-	memcpy(addr, kv_db, KV_SIZE);
 	printf("This is the size of the database in bytes: %d\n", KV_SIZE);
 	return 0;
 }
@@ -63,11 +64,14 @@ int kv_store_write(char *key, char *value){
 	while(i < (location_wr + 256*256)){
 
 		if (addr[i] == NULL){
+			int offset = i;
 			printf("At index %d we insert the characters\n", i);
 			for (int j = 0; j < strlen(value); j++){
 				addr[i+j] = value[j];
 				printf("At index %d we insert the character %c\n", i+j, addr[i+j]);
 			}
+			memcpy(addr + offset, value, ENTRY_SIZE);
+			printf("Copied into memory\n");
 			return 0;
 		}
 		else{
@@ -91,6 +95,25 @@ int kv_store_write(char *key, char *value){
 
 // This function takes a key and searches the store for the key-value pair.
 char *kv_store_read(char *key){
+	struct stat s;
+
+	fd = shm_open ("achell", O_RDWR, 0);
+	if (fd < 0){
+		printf("Error... opening shm\n");
+	}
+
+	if (fstat(fd, &s) == -1){
+		printf("Error fstat\n");
+	}
+
+    int filedesc = open("testfile.txt", O_WRONLY | O_APPEND);
+ 
+    if (filedesc < 0) {
+        return -1;
+    }
+
+	write(filedesc, "This will be output to testfile.txt\n", 36);
+
 
 }
 
@@ -128,5 +151,11 @@ int main (int argc, char **argv){
 	kv_store_create("achell");
 	kv_store_write("Arunen", "Today");
 	kv_store_write("Arunen", "Green");
+    int filedesc = open("testfile.txt", O_WRONLY | O_APPEND);
+ 
+    if (filedesc < 0) {
+        return -1;
+    }
 
+	write(filedesc, "This will be output to testfile.txt\n", 36);
 }
