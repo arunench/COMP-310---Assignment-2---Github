@@ -23,17 +23,16 @@ int fd;
 // This function creates a store if it is not yet created or opens the store if it is already created
 int kv_store_create(char *name){
 
-
-
+	
 	fd = shm_open(name, O_CREAT|O_RDWR, S_IRWXU); 
 
 	addr = mmap(NULL, KV_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 
-	for (int i = 0; i < KV_SIZE; i++){
-		addr[i] = NULL;
-	}
+	// for (int i = 0; i < KV_SIZE; i++){
+	// 	addr[i] = NULL;
+	// }
 
-
+	
 	if (fd < 0){
 		printf("Error.. opening shm\n");
 		return -1;
@@ -44,7 +43,7 @@ int kv_store_create(char *name){
 		printf("This is the file descriptor: %d\n", fd);
 		printf("Truncating the file descriptor to appropriate size\n");
 		ftruncate(fd, KV_SIZE);
-		close(fd);
+		//close(fd);
 	}
 
 	printf("This is the size of the database in bytes: %d\n", KV_SIZE);
@@ -60,6 +59,28 @@ int kv_store_write(char *key, char *value){
 	printf("Inserting at pod %d\n", pod_num);
 	int location_wr = pod_num * NUMBER_OF_ENTRIES * ENTRY_SIZE + 3; 
 	int i = location_wr;
+	int index_loc = pod_num * NUMBER_OF_ENTRIES * ENTRY_SIZE;
+
+
+	if(strlen(key) > 32){
+
+		printf("The key is greater than 32 characters, we will need to truncating it!\n");
+		//char temp[32];
+
+		// for (int i = 0; i < 33; i++){
+		// 	temp[i] = key[i];
+		// 	key[i] = '\0';
+		// }
+
+		// for (int j = 0; j < 33; j++){
+		// 	key[j] = temp[j]; 
+		// }
+
+		key[32]  = '\0';
+
+		printf("This is the truncated key: %s. It not has a size of: %s\n", key, strlen(key));
+
+	}
 
 	while(i < (location_wr + 256*256)){
 
@@ -73,7 +94,7 @@ int kv_store_write(char *key, char *value){
 				printf("At index %d we insert the character %c\n", i+j, addr[i+j]);
 			}
 
-			memcpy(addr + offset, value, ENTRY_SIZE);
+			//memcpy(addr + offset, value, ENTRY_SIZE);
 			printf("Copied into memory\n");
 			return 0;
 
@@ -128,8 +149,9 @@ int hash_func(char *word){
 // setting up, writing, and reading
 int main (int argc, char **argv){
 
-	kv_store_create("achell");
-	kv_store_write("Arunen", "Today");
-	kv_store_write("Arunen", "Green");
+	// kv_store_create("achell");
+	// kv_store_write("Arunen", "Today");
+	// kv_store_write("Arunen", "Green");
+	read_eval();
 
 }
